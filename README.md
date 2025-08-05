@@ -1,6 +1,6 @@
 # YouTube Shorts Bot Manager (WIP)
 
-A professional GUI application for automating YouTube Shorts creation from Reddit content across multiple channels.
+A GUI application for automating YouTube Shorts creation from Reddit content across multiple channels.
 
 ## Features
 
@@ -164,6 +164,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Note**: Remember to keep your API credentials secure and never commit them to version control!
+
 
 
 
