@@ -814,7 +814,7 @@ def sanitize_text_for_utf8(txt):
             try:
                 safe_txt = txt.encode('utf-8', errors='replace').decode('utf-8')
                 # Remove replacement characters and clean up
-                safe_txt = safe_txt.replace('�', ' ')
+                safe_txt = safe_txt.replace(' ', ' ')
                 # Keep only printable characters and basic whitespace
                 safe_txt = re.sub(r'[^\x20-\x7E\u00A0-\u024F\u1E00-\u1EFF]', ' ', safe_txt)
                 safe_txt = re.sub(r'\s+', ' ', safe_txt).strip()
@@ -840,7 +840,7 @@ def sanitize_text_for_utf8(txt):
             return result if result else "Content"
         except:
             return "Content"
-        if '�' in safe_txt:  # Unicode replacement character indicates issues
+        if ' ' in safe_txt:  # Unicode replacement character indicates issues
             # Remove emojis and special characters that cause issues
             # Keep only ASCII printable chars, basic Latin, and safe Unicode ranges
             safe_txt = re.sub(r'[^\x20-\x7E\u00A0-\u024F\u1E00-\u1EFF]', '', safe_txt)
@@ -1338,7 +1338,7 @@ def process_channel(profile):
     backup_file = tok + ".backup"
     if os.path.exists(backup_file) and not os.path.exists(tok):
         gui_print(f"🔧 Found backup token file but no active token for {CHANNEL['yt_token']}")
-        gui_print("� Attempting to restore token from backup...")
+        gui_print("  Attempting to restore token from backup...")
         try:
             # Try to restore the backup file
             import shutil
@@ -1355,7 +1355,7 @@ def process_channel(profile):
                     gui_print("⚠️ Restored token may be expired but will attempt refresh")
             except Exception as test_error:
                 gui_print(f"⚠️ Restored token validation failed: {test_error}")
-                gui_print("�🗑️ Removing invalid backup, will regenerate fresh token")
+                gui_print(" 🗑️ Removing invalid backup, will regenerate fresh token")
                 os.remove(tok)
                 os.remove(backup_file)
                 
@@ -1718,18 +1718,30 @@ def process_channel(profile):
                 # Process the video with audio detection
                 final_video_path = process_video_with_audio_check(out_path, profile, log_callback=audio_log)
                 
+                # Debug logging for path tracking
+                print(f"🔍 Debug: Original out_path: {out_path}")
+                print(f"🔍 Debug: Final video path from audio processing: {final_video_path}")
+                
                 # If a new file was created with music, update the path
                 if final_video_path != out_path:
-                    # Clean up the original file if a new one was created
-                    if os.path.exists(out_path) and os.path.exists(final_video_path):
+                    print(f"🔍 Debug: New file created with music, updating path")
+                    
+                    # Clean up the original file if it still exists
+                    if os.path.exists(out_path):
                         try:
                             os.remove(out_path)
+                            print(f"🔍 Debug: Removed original file: {out_path}")
                         except:
                             pass
-                        
-                        # Update the output path
-                        out_path = final_video_path
-                        print(f"✅ Video enhanced with background music: {os.path.basename(out_path)}")
+                    else:
+                        print(f"🔍 Debug: Original file already removed by audio processing")
+                    
+                    # Always update the output path when a new file is created
+                    out_path = final_video_path
+                    print(f"✅ Video enhanced with background music: {os.path.basename(out_path)}")
+                    print(f"🔍 Debug: Updated out_path to: {out_path}")
+                else:
+                    print(f"🔍 Debug: No path change needed (paths are identical)")
             else:
                 print("🎵 Music processing disabled for this channel")
         
@@ -1781,6 +1793,12 @@ def process_channel(profile):
         
         # Upload the video
         check_abort()  # Check for abort right before uploading
+        # Debug logging for upload path
+        print(f"🔍 Debug: About to upload file: {out_path}")
+        print(f"🔍 Debug: File exists: {os.path.exists(out_path)}")
+        if os.path.exists(out_path):
+            print(f"🔍 Debug: File size: {os.path.getsize(out_path)} bytes")
+        
         # Use smaller chunk size for more responsive abort checking
         media = MediaFileUpload(out_path, chunksize=1024*1024, resumable=True)  # 1MB chunks instead of full file
         request = yt.videos().insert(
