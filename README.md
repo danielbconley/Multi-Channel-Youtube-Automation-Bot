@@ -124,18 +124,9 @@ youtube-shorts-bot/
 - OAuth 2.0 authentication flow
 
 ### Safety Features
-- UTF-8 encoding error handling
 - Process abortion mechanisms
 - Daily upload limit enforcement
 - Duplicate content detection
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## Disclaimer
 
@@ -152,7 +143,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Troubleshooting
 
 ### Common Issues
-- **Encoding Errors**: The system automatically handles UTF-8 issues
 - **API Limits**: Daily upload limits are enforced automatically
 - **Missing Dependencies**: Install all requirements from `requirements.txt`
 
@@ -164,6 +154,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Note**: Remember to keep your API credentials secure and never commit them to version control!
+
 
 
 
