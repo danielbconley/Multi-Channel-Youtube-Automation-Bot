@@ -13,15 +13,12 @@ import json
 import os
 import sys
 import threading
-import subprocess
 import queue
 import shutil
-import pickle
 import webbrowser
 from datetime import datetime
 import re
 import importlib
-from datetime import datetime
 
 # Add the current directory to Python path to import process_videos
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -331,23 +328,6 @@ class YouTubeBotsGUI:
         else:
             self.animation_timer = None
     
-    def center_window(self):
-        """Center the main window on the screen"""
-        # Get screen dimensions
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        
-        # Use the fixed window dimensions (1400x900)
-        window_width = 1400
-        window_height = 900
-        
-        # Calculate center position, but move it higher up by 40 pixels
-        x = (screen_width - window_width) // 2
-        y = (screen_height - window_height) // 2 - 40
-        
-        # Set the window position with the correct size
-        self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
-    
     def setup_styles(self):
         """Configure clean light theme styles"""
         style = ttk.Style()
@@ -418,123 +398,6 @@ class YouTubeBotsGUI:
         style.configure('Treeview', background='white', foreground=fg_color, fieldbackground='white', borderwidth=1, relief='solid')
         style.configure('TLabelframe', background=bg_color, foreground=fg_color, borderwidth=1, relief='solid')
         style.configure('TLabelframe.Label', background=bg_color, foreground=fg_color)
-    
-    def validate_int(self, value):
-        """Validate integer input for spinboxes"""
-        if value == "":
-            return True  # Allow empty string
-        try:
-            int_val = int(value)
-            # Additional range checking to prevent issues
-            if -999999 <= int_val <= 999999:  # Reasonable range
-                return True
-            else:
-                return False
-        except ValueError:
-            return False
-        except Exception as e:
-            # Log unexpected errors but don't crash
-            print(f"Validation error: {e}")
-            return False
-    
-    def validate_float(self, value):
-        """Validate float input for spinboxes"""
-        if value == "":
-            return True  # Allow empty string
-        try:
-            float_val = float(value)
-            # Additional range checking to prevent issues
-            if -999999.0 <= float_val <= 999999.0:  # Reasonable range
-                return True
-            else:
-                return False
-        except ValueError:
-            return False
-        except Exception as e:
-            # Log unexpected errors but don't crash
-            print(f"Validation error: {e}")
-            return False
-    
-    def validate_spinbox_value(self, spinbox_widget, tk_var, min_val, max_val):
-        """Validate and correct spinbox values to prevent crashes"""
-        try:
-            current_value = tk_var.get()
-            
-            # Handle different variable types
-            if isinstance(tk_var, tk.IntVar):
-                if current_value < min_val or current_value > max_val:
-                    # Reset to closest valid value
-                    corrected_value = max(min_val, min(max_val, current_value))
-                    tk_var.set(corrected_value)
-                    self.log_message(f"🔧 Corrected invalid value to {corrected_value}")
-            elif isinstance(tk_var, tk.DoubleVar):
-                if current_value < min_val or current_value > max_val:
-                    # Reset to closest valid value
-                    corrected_value = max(min_val, min(max_val, current_value))
-                    tk_var.set(corrected_value)
-                    self.log_message(f"🔧 Corrected invalid value to {corrected_value}")
-                    
-        except Exception as e:
-            # If there's any error, reset to a safe default
-            try:
-                if isinstance(tk_var, tk.IntVar):
-                    safe_default = int((min_val + max_val) / 2)
-                elif isinstance(tk_var, tk.DoubleVar):
-                    safe_default = float((min_val + max_val) / 2)
-                else:
-                    safe_default = min_val
-                    
-                tk_var.set(safe_default)
-                self.log_message(f"🔧 Reset invalid spinbox value to safe default: {safe_default}")
-            except Exception as reset_error:
-                self.log_message(f"⚠️ Could not reset spinbox value: {reset_error}")
-    
-    def safe_spinbox_click(self, event, spinbox_widget, tk_var, min_val, max_val):
-        """Safely handle spinbox click events to prevent crashes"""
-        try:
-            # Allow the normal click behavior but catch any errors
-            return None  # Let the event proceed normally
-        except Exception as e:
-            self.log_message(f"🛡️ Prevented spinbox click error: {e}")
-            # Force a safe value if there's an error
-            try:
-                if isinstance(tk_var, tk.IntVar):
-                    safe_val = max(min_val, min(max_val, tk_var.get()))
-                    tk_var.set(safe_val)
-                elif isinstance(tk_var, tk.DoubleVar):
-                    safe_val = max(min_val, min(max_val, tk_var.get()))
-                    tk_var.set(safe_val)
-            except:
-                # If even that fails, set to middle value
-                middle_val = (min_val + max_val) / 2
-                tk_var.set(middle_val)
-            return "break"  # Stop the event from propagating
-    
-    def safe_spinbox_key(self, event, spinbox_widget, tk_var, min_val, max_val):
-        """Safely handle spinbox key events to prevent crashes"""
-        try:
-            # For up/down arrow keys, handle them safely
-            if event.keysym in ['Up', 'Down']:
-                current_val = tk_var.get()
-                if event.keysym == 'Up':
-                    if isinstance(tk_var, tk.IntVar):
-                        new_val = min(max_val, current_val + 1)
-                    else:  # DoubleVar
-                        new_val = min(max_val, current_val + 0.1)
-                else:  # Down
-                    if isinstance(tk_var, tk.IntVar):
-                        new_val = max(min_val, current_val - 1)
-                    else:  # DoubleVar
-                        new_val = max(min_val, current_val - 0.1)
-                
-                tk_var.set(new_val)
-                self.track_profile_changes()  # Mark as changed
-                return "break"  # Prevent default handling
-            
-            return None  # Allow other keys to proceed normally
-        except Exception as e:
-            self.log_message(f"🛡️ Prevented spinbox key error: {e}")
-            return "break"  # Stop the event from propagating
     
     def add_global_error_protection(self):
         """Add global error protection to prevent widget crashes"""
@@ -932,6 +795,17 @@ REM pause
         self._cache_expiry[filepath] = current_time
         return exists
 
+    def clear_file_cache(self, filepath=None):
+        """Clear file existence cache for a specific file or all files."""
+        if filepath:
+            # Clear cache for specific file
+            self._file_cache.pop(filepath, None)
+            self._cache_expiry.pop(filepath, None)
+        else:
+            # Clear all cache
+            self._file_cache.clear()
+            self._cache_expiry.clear()
+
     def _configure_common_styles(self):
         """Pre-configure common widget styles to improve performance."""
         try:
@@ -1020,7 +894,7 @@ REM pause
         warning_buttons.pack(side=tk.RIGHT, padx=(10, 0))
         
         ttk.Button(warning_buttons, text="📁 Browse & Copy File", 
-                  command=self.browse_client_secrets_for_banner, style="TButton").pack(side=tk.RIGHT, padx=(0, 5))
+                  command=self.browse_client_secrets_for_banner, style="Accent.TButton").pack(side=tk.RIGHT, padx=(0, 5))
         ttk.Button(warning_buttons, text="📖 Setup Guide", 
                   command=self.show_client_secrets_guide, style="TButton").pack(side=tk.RIGHT)
         
@@ -1082,22 +956,58 @@ REM pause
         """Browse and copy client_secrets.json from the warning banner"""
         try:
             source_file = filedialog.askopenfilename(
-                title="Select downloaded client_secrets.json file",
-                filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+                title="Select Google Cloud OAuth 2.0 credentials file",
+                filetypes=[
+                    ("JSON files", "*.json"), 
+                    ("All files", "*.*")
+                ],
                 initialdir=os.path.expanduser("~/Downloads")  # Start in Downloads folder
             )
             
             if not source_file:  # User cancelled
                 return
             
-            # Check if it's actually named client_secrets.json or similar
+            # Validate that it's a Google Cloud credentials file
             filename = os.path.basename(source_file)
-            if 'client' not in filename.lower() or not filename.endswith('.json'):
-                if not messagebox.askyesno("File Name Warning", 
-                                         f"Selected file: {filename}\n\n"
-                                         "This doesn't look like a client_secrets.json file.\n"
-                                         "Continue anyway?"):
-                    return
+            if not filename.endswith('.json'):
+                messagebox.showerror("Invalid File", 
+                                   f"Selected file: {filename}\n\n"
+                                   "Please select a JSON file downloaded from Google Cloud Console.")
+                return
+            
+            # Try to read and validate the JSON structure
+            try:
+                with open(source_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                # Check if it looks like a Google OAuth credentials file
+                if 'installed' not in data and 'web' not in data:
+                    response = messagebox.askyesno("File Validation", 
+                                                 f"Selected file: {filename}\n\n"
+                                                 "This doesn't appear to be a Google Cloud OAuth 2.0 credentials file.\n"
+                                                 "Expected structure should contain 'installed' or 'web' section.\n\n"
+                                                 "Continue anyway?")
+                    if not response:
+                        return
+                elif 'installed' in data:
+                    # Validate required fields for installed app
+                    required_fields = ['client_id', 'client_secret', 'auth_uri', 'token_uri']
+                    missing_fields = [field for field in required_fields if field not in data['installed']]
+                    if missing_fields:
+                        response = messagebox.askyesno("File Validation", 
+                                                     f"Selected file: {filename}\n\n"
+                                                     f"Missing required fields: {', '.join(missing_fields)}\n\n"
+                                                     "Continue anyway?")
+                        if not response:
+                            return
+                            
+            except json.JSONDecodeError:
+                messagebox.showerror("Invalid JSON", 
+                                   f"The selected file is not valid JSON:\n{filename}\n\n"
+                                   "Please select a valid Google Cloud credentials file.")
+                return
+            except Exception as e:
+                self.log_message(f"⚠️ Could not validate file: {str(e)}")
             
             # Copy to the correct location
             target_path = os.path.join(os.path.dirname(__file__), "client_secrets.json")
@@ -1106,13 +1016,16 @@ REM pause
                 shutil.copy2(source_file, target_path)
                 self.log_message(f"✅ Copied {filename} to client_secrets.json")
                 
-                # Recheck and hide warning banner
+                # Clear the file cache to force immediate recheck
+                self.clear_file_cache(target_path)
+                
+                # Force immediate recheck and hide warning banner
                 self.check_client_secrets()
                 
                 messagebox.showinfo("Success!", 
-                                  f"✅ client_secrets.json has been copied successfully!\n\n"
-                                  f"From: {source_file}\n"
-                                  f"To: {target_path}\n\n"
+                                  f"✅ Google Cloud credentials copied successfully!\n\n"
+                                  f"From: {filename}\n"
+                                  f"To: client_secrets.json\n\n"
                                   "You can now create new YouTube channel profiles.")
                 
             except Exception as e:
@@ -1393,9 +1306,7 @@ REM pause
         ttk.Button(warning_buttons, text="⚙️ Configure Reddit API", 
                   command=self.show_reddit_config_dialog, style="Accent.TButton").pack(side=tk.RIGHT, padx=(0, 5))
         ttk.Button(warning_buttons, text="📖 Setup Guide", 
-                  command=self.show_reddit_setup_guide, style="TButton").pack(side=tk.RIGHT, padx=(0, 5))
-        ttk.Button(warning_buttons, text="🔄 Recheck", 
-                  command=self.refresh_reddit_config_check, style="TButton").pack(side=tk.RIGHT)
+                  command=self.show_reddit_setup_guide, style="TButton").pack(side=tk.RIGHT)
         
         # Show the warning frame - use grid at row 3 (after client_secrets warning)
         self.reddit_warning_frame.grid(row=3, column=0, sticky="ew", pady=(0, 15))
@@ -2058,11 +1969,43 @@ REM pause
     def browse_client_secrets_file(self):
         """Browse for a new client_secrets.json file"""
         filename = filedialog.askopenfilename(
-            title="Select client_secrets.json file",
+            title="Select Google Cloud OAuth 2.0 credentials file",
             filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
-            initialdir=os.path.dirname(self.client_secrets_var.get())
+            initialdir=os.path.dirname(self.client_secrets_var.get()) if os.path.exists(self.client_secrets_var.get()) else os.path.expanduser("~/Downloads")
         )
         if filename:
+            # Validate it's a JSON file
+            if not filename.endswith('.json'):
+                messagebox.showerror("Invalid File", "Please select a JSON file.")
+                return
+            
+            # Try to validate the JSON structure
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                # Check if it looks like a Google OAuth credentials file
+                if 'installed' not in data and 'web' not in data:
+                    response = messagebox.askyesno("File Validation", 
+                                                 f"This doesn't appear to be a Google Cloud OAuth 2.0 credentials file.\n"
+                                                 "Expected structure should contain 'installed' or 'web' section.\n\n"
+                                                 "Use this file anyway?")
+                    if not response:
+                        return
+                        
+            except json.JSONDecodeError:
+                messagebox.showerror("Invalid JSON", 
+                                   "The selected file is not valid JSON.\n\n"
+                                   "Please select a valid Google Cloud credentials file.")
+                return
+            except Exception as e:
+                # If we can't read it, let user proceed with warning
+                response = messagebox.askyesno("File Access Warning", 
+                                             f"Could not validate file: {str(e)}\n\n"
+                                             "Use this file anyway?")
+                if not response:
+                    return
+            
             self.client_secrets_var.set(filename)
             self.update_secrets_status()
     
