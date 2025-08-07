@@ -53,6 +53,9 @@ class YouTubeBotsGUI:
         self.root.resizable(False, False)  # Lock window size - no resizing allowed
         self.root.configure(bg='#f8f9fa')  # Light theme background
         
+        # Hide window initially to prevent flicker during setup
+        self.root.withdraw()
+        
         # Handle window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         
@@ -171,13 +174,16 @@ class YouTubeBotsGUI:
                 self.log_message(f"❌ Error creating profiles.json: {str(e)}")
 
     def center_window(self):
-        """Center the window on screen"""
+        """Center the window on screen, positioned slightly higher"""
         self.root.update_idletasks()
         width = self.root.winfo_width()
         height = self.root.winfo_height()
         x = (self.root.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.root.winfo_screenheight() // 2) - (height // 2)
+        y = (self.root.winfo_screenheight() // 2) - (height // 2) - 50  # Move up by 50 pixels
         self.root.geometry(f"+{x}+{y}")
+        
+        # Show the window after positioning to prevent flicker
+        self.root.deiconify()
 
     def start_period_animation(self, stage_name):
         """Start animating periods for a processing stage"""
