@@ -1136,18 +1136,6 @@ def clean_title(title):
     
     return cleaned
 
-def atomic_write(fp, text):
-    with tempfile.NamedTemporaryFile("w", delete=False, dir=BASE_DIR) as tf:
-        tf.write(text)
-    os.replace(tf.name, fp)
-
-def load_json(fp, default):
-    try:
-        with open(fp, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return default
-
 def process_channel_with_utf8_recovery(profile):
     """Wrapper around process_channel with UTF-8 error recovery via post skipping"""
     try:
