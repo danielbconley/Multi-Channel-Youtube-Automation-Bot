@@ -2033,7 +2033,7 @@ REM pause
         
         # Both buttons side by side
         
-        ttk.Button(token_buttons_frame, text="� Open Tokens Folder", 
+        ttk.Button(token_buttons_frame, text="  Open Tokens Folder", 
                   command=lambda: os.startfile(os.path.join(os.path.dirname(__file__), "tokens")), 
                   style="TButton").pack(side=tk.LEFT, padx=(0, 10))
         
@@ -4967,7 +4967,7 @@ Ready to proceed?"""
                 
                 self.processing_queue.put(("log", f"🎯 Video Selection: {sort_display}"))
                 self.processing_queue.put(("log", f"🔄 Fallback Mode: {fallback_status}"))
-                self.processing_queue.put(("log", f"📊 Daily Upload Limit: {profile.get('daily_upload_limit', 1)} video(s)"))
+                self.processing_queue.put(("log", f" 📊 Daily Upload Limit: {profile.get('daily_upload_limit', 1)} video(s)"))
                 
                 self.processing_queue.put(("progress", 10))
                 
@@ -5598,7 +5598,7 @@ Ready to proceed?"""
         
         # Add different formatting based on message type
         # Check for progress stage updates FIRST (before checking for 🚀 start messages)
-        if any(emoji in message for emoji in ["🔍", "🎬", "�", "🚀", "🧹"]) and any(word in message for word in ["Fetching", "Processing", "Rendering", "Uploading", "Cleanup"]):
+        if any(emoji in message for emoji in ["🔍", "🎬", " ", "🚀", "🧹"]) and any(word in message for word in ["Fetching", "Processing", "Rendering", "Uploading", "Cleanup"]):
             # Progress stage updates - clean, no separators, consistent spacing for alignment
             formatted_msg = f"[{timestamp}]   {message}\n"
         elif any(msg in message for msg in ["📂 Subreddit:", "🎵 Music:", "🎯 Video Selection:", "🔄 Fallback Mode:", "🔒 Test mode:"]):
